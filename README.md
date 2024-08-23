@@ -34,7 +34,8 @@ You can export the active Claude chat log directly from the browser console, ent
 # Sending Javascript Requests
 `2024-03-19 16:04:20`
 
-_Prompt_:
+## _Prompt_:
+
 How can I send a request in Javascript?
 
 _Claude_:

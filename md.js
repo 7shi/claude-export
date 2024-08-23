@@ -81,7 +81,7 @@
   const { elements, title } = getContents();
 
   var timestamp = getTimestamp();
-  markdown += `\# ${title || "Claude Chat"}\n\`${timestamp}\`\n\n`;
+  markdown += `\# ${title || "Claude Chat"}\n\`${timestamp}\`\n`;
 
   for (var i = 0; i < elements.length; i++) {
     var ele = elements[i];
@@ -118,7 +118,7 @@
         }
         clip.writeText = clip._writeText;
       } else {
-        markdown += `_Prompt_:\n`;
+        markdown += `\n## Prompt:\n\n`;
 
         // Parse child elements
         for (var n = 0; n < childNodes.length; n++) {
