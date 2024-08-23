@@ -1,4 +1,4 @@
-(function exportMarkdown() {
+(async function exportMarkdown() {
   function consoleSave(console, fileType, title = "") {
     console.save = function (data) {
       let mimeType = "text/plain";
@@ -101,121 +101,137 @@
       // Prefix Claude reponse label
       if (ele.classList.contains("font-claude-message")) {
         markdown += `_Claude_:\n`;
+        var clip = navigator.clipboard;
+        if (!clip._writeText) clip._writeText = clip.writeText;
+        for (var copy of Array.from(ele.nextSibling.getElementsByTagName("button")).filter(b => b.innerText == "Copy")) {
+          await new Promise((resolve, reject) => {
+            clip.writeText = async arg => {
+              markdown += arg.trimEnd() + "\n";
+              resolve();
+            };
+            try {
+              copy.click();
+            } catch (e) {
+              reject(e);
+            }
+          });
+        }
+        clip.writeText = clip._writeText;
       } else {
         markdown += `_Prompt_:\n`;
-      }
 
-      // Parse child elements
-      for (var n = 0; n < childNodes.length; n++) {
-        const childNode = childNodes[n];
+        // Parse child elements
+        for (var n = 0; n < childNodes.length; n++) {
+          const childNode = childNodes[n];
 
-        if (childNode.nodeType === Node.ELEMENT_NODE) {
-          var tag = childNode.tagName;
-          var text = childNode.textContent;
-          // Paragraphs
-          if (tag === "P") {
-            markdown += `${text}\n`;
-          }
-
-          // Get list items
-          if (tag === "OL") {
-            var index = 0;
-            childNode.childNodes.forEach((listItemNode) => {
-              if (
-                listItemNode.nodeType === Node.ELEMENT_NODE &&
-                listItemNode.tagName === "LI"
-              ) {
-                markdown += `${++index}. ${
-                  listItemNode.textContent
-                }\n`;
-              }
-            });
-          }
-          if (tag === "UL") {
-            childNode.childNodes.forEach((listItemNode, index) => {
-              if (
-                listItemNode.nodeType === Node.ELEMENT_NODE &&
-                listItemNode.tagName === "LI"
-              ) {
-                markdown += `- ${listItemNode.textContent}\n`;
-              }
-            });
-          }
-
-          // Code blocks
-          if (tag === "PRE") {
-            const codeBlockSplit = text.split("Copy code");
-            const codeBlockLang = codeBlockSplit[0].trim();
-            const codeBlockData = codeBlockSplit[1].trim();
-            markdown += `\`\`\`${codeBlockLang}\n${codeBlockData}\n\`\`\`\n`;
-          }
-
-          // Quotes
-          if (tag === "BLOCKQUOTE") {
-            for (const line of text.trim().split("\n")) {
-              markdown += `> ${line}\n`;
+          if (childNode.nodeType === Node.ELEMENT_NODE) {
+            var tag = childNode.tagName;
+            var text = childNode.textContent;
+            // Paragraphs
+            if (tag === "P") {
+              markdown += `${text}\n`;
             }
-          }
 
-          // Tables
-          if (tag === "TABLE") {
-            // Get table sections
-            let tableMarkdown = "";
-            childNode.childNodes.forEach((tableSectionNode) => {
-              if (
-                tableSectionNode.nodeType === Node.ELEMENT_NODE &&
-                (tableSectionNode.tagName === "THEAD" ||
-                  tableSectionNode.tagName === "TBODY")
-              ) {
-                // Get table rows
-                let tableRows = "";
-                let tableColCount = 0;
-                tableSectionNode.childNodes.forEach(
-                  (tableRowNode) => {
-                    if (
-                      tableRowNode.nodeType === Node.ELEMENT_NODE &&
-                      tableRowNode.tagName === "TR"
-                    ) {
-                      // Get table cells
-                      let tableCells = "";
+            // Get list items
+            if (tag === "OL") {
+              var index = 0;
+              childNode.childNodes.forEach((listItemNode) => {
+                if (
+                  listItemNode.nodeType === Node.ELEMENT_NODE &&
+                  listItemNode.tagName === "LI"
+                ) {
+                  markdown += `${++index}. ${
+                    listItemNode.textContent
+                  }\n`;
+                }
+              });
+            }
+            if (tag === "UL") {
+              childNode.childNodes.forEach((listItemNode, index) => {
+                if (
+                  listItemNode.nodeType === Node.ELEMENT_NODE &&
+                  listItemNode.tagName === "LI"
+                ) {
+                  markdown += `- ${listItemNode.textContent}\n`;
+                }
+              });
+            }
 
-                      tableRowNode.childNodes.forEach(
-                        (tableCellNode) => {
-                          if (
-                            tableCellNode.nodeType ===
-                              Node.ELEMENT_NODE &&
-                            (tableCellNode.tagName === "TD" ||
-                              tableCellNode.tagName === "TH")
-                          ) {
-                            tableCells += `| ${tableCellNode.textContent} `;
+            // Code blocks
+            if (tag === "PRE") {
+              const codeBlockSplit = text.split("Copy code");
+              const codeBlockLang = codeBlockSplit[0].trim();
+              const codeBlockData = codeBlockSplit[1].trim();
+              markdown += `\`\`\`${codeBlockLang}\n${codeBlockData}\n\`\`\`\n`;
+            }
+
+            // Quotes
+            if (tag === "BLOCKQUOTE") {
+              for (const line of text.trim().split("\n")) {
+                markdown += `> ${line}\n`;
+              }
+            }
+
+            // Tables
+            if (tag === "TABLE") {
+              // Get table sections
+              let tableMarkdown = "";
+              childNode.childNodes.forEach((tableSectionNode) => {
+                if (
+                  tableSectionNode.nodeType === Node.ELEMENT_NODE &&
+                  (tableSectionNode.tagName === "THEAD" ||
+                    tableSectionNode.tagName === "TBODY")
+                ) {
+                  // Get table rows
+                  let tableRows = "";
+                  let tableColCount = 0;
+                  tableSectionNode.childNodes.forEach(
+                    (tableRowNode) => {
+                      if (
+                        tableRowNode.nodeType === Node.ELEMENT_NODE &&
+                        tableRowNode.tagName === "TR"
+                      ) {
+                        // Get table cells
+                        let tableCells = "";
+
+                        tableRowNode.childNodes.forEach(
+                          (tableCellNode) => {
                             if (
-                              tableSectionNode.tagName === "THEAD"
+                              tableCellNode.nodeType ===
+                                Node.ELEMENT_NODE &&
+                              (tableCellNode.tagName === "TD" ||
+                                tableCellNode.tagName === "TH")
                             ) {
-                              tableColCount++;
+                              tableCells += `| ${tableCellNode.textContent} `;
+                              if (
+                                tableSectionNode.tagName === "THEAD"
+                              ) {
+                                tableColCount++;
+                              }
                             }
                           }
-                        }
-                      );
-                      tableRows += `${tableCells}|\n`;
+                        );
+                        tableRows += `${tableCells}|\n`;
+                      }
                     }
+                  );
+
+                  tableMarkdown += tableRows;
+
+                  if (tableSectionNode.tagName === "THEAD") {
+                    const headerRowDivider = `| ${Array(tableColCount)
+                      .fill("---")
+                      .join(" | ")} |\n`;
+                    tableMarkdown += headerRowDivider;
                   }
-                );
-
-                tableMarkdown += tableRows;
-
-                if (tableSectionNode.tagName === "THEAD") {
-                  const headerRowDivider = `| ${Array(tableColCount)
-                    .fill("---")
-                    .join(" | ")} |\n`;
-                  tableMarkdown += headerRowDivider;
                 }
-              }
-            });
-            markdown += tableMarkdown;
-          }
+              });
+              markdown += tableMarkdown;
+            }
 
-          // Paragraph break after each element
-          markdown += "\n";
+            // Paragraph break after each element
+            markdown += "\n";
+          }
         }
       }
     }
