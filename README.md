@@ -6,7 +6,7 @@ This is a fork from [ryanschiang/claude-export](https://github.com/ryanschiang/c
     ./LICENSE
 )
 
-This browser script formats and downloads Anthropic Claude conversations to markdown, JSON, and PNG for sharing and exporting chat logs.
+This browser script formats and downloads Anthropic Claude conversations to markdown for sharing and exporting chat logs.
 
 You can export the active Claude chat log directly from the browser console, entirely locally. No data is sent to any server.
 
