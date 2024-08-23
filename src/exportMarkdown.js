@@ -1,6 +1,78 @@
-const consoleSave = require("./util/consoleSave");
-const getTimestamp = require("./util/getTimestamp");
-const getContents = require("./util/getContents");
+const consoleSave = function (console, fileType, title = "") {
+  console.save = function (data) {
+    let mimeType = "text/plain";
+
+    let filename = title ? title.trim().toLowerCase().replace(/^[^\w\d]+|[^\w\d]+$/g, '').replace(/[\s\W-]+/g, '-') : "claude";
+    if (fileType.toLowerCase() === "json") {
+      filename += ".json";
+      mimeType = "text/json";
+
+      if (typeof data === "object") {
+        data = JSON.stringify(data, undefined, 4);
+      }
+    } else if (fileType.toLowerCase() === "md") {
+      filename += ".md";
+    }
+
+    var blob = new Blob([data], { type: mimeType });
+    var a = document.createElement("a");
+
+    a.download = filename;
+    a.href = window.URL.createObjectURL(blob);
+    a.dataset.downloadurl = [mimeType, a.download, a.href].join(":");
+    var e = new MouseEvent("click", {
+      canBubble: true,
+      cancelable: false,
+      view: window,
+      detail: 0,
+      screenX: 0,
+      screenY: 0,
+      clientX: 0,
+      clientY: 0,
+      ctrlKey: false,
+      altKey: false,
+      shiftKey: false,
+      metaKey: false,
+      button: 0,
+      relatedTarget: null,
+    });
+
+    a.dispatchEvent(e);
+  };
+};
+
+const getTimestamp = function () {
+  return new Date(
+    new Date(new Date(new Date()).toISOString()).getTime() -
+      new Date().getTimezoneOffset() * 60000
+  )
+    .toISOString()
+    .slice(0, 19)
+    .replace("T", " ");
+};
+
+const getContents = function () {
+  // Get parent chat container
+  const chatContainer = document.querySelector(
+      "div.flex-1.flex.flex-col.gap-3.px-4.pt-16"
+  );
+
+  // Get chat title (if exists)
+  const titleEle = document.querySelector(
+      "button[data-testid='chat-menu-trigger']"
+  );
+  const titleText = titleEle ? titleEle.textContent : "";
+
+  // Find all chat elements
+  const elements = chatContainer.querySelectorAll(
+      "div.font-claude-message, div.font-user-message"
+  );
+
+  return {
+      elements,
+      title: titleText,
+  };
+};
 
 (function exportMarkdown() {
   var markdown = "";
