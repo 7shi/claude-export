@@ -119,12 +119,13 @@
 
           // Get list items
           if (tag === "OL") {
-            childNode.childNodes.forEach((listItemNode, index) => {
+            var index = 0;
+            childNode.childNodes.forEach((listItemNode) => {
               if (
                 listItemNode.nodeType === Node.ELEMENT_NODE &&
                 listItemNode.tagName === "LI"
               ) {
-                markdown += `${index + 1}. ${
+                markdown += `${++index}. ${
                   listItemNode.textContent
                 }\n`;
               }
