@@ -60,19 +60,6 @@ In this example, fetch sends a GET request to the specified URL (https://api.exa
 
 This is a trivial implementation as Claude currently does not support sharing or exporting conversations. It may break with future changes.
 
-It currently supports:
-- Paragraphs / Text
-- Lists
-- Code blocks
-- Tables
-
 ## You May Also Like
 
 [`chatgpt-export`](https://github.com/ryanschiang/chatgpt-export) - Export OpenAI ChatGPT conversations to markdown, JSON, and PNG for sharing and exporting chat logs.
-
-## Future Development
-
-- [ ] Nested code blocks (within lists)
-- [ ] Nested lists 
-- [x] Fix syntax highlighting
-- [x] Trim whitespace on exported images
