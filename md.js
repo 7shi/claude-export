@@ -106,6 +106,7 @@
         for (var copy of Array.from(ele.nextSibling.getElementsByTagName("button")).filter(b => b.innerText == "Copy")) {
           await new Promise((resolve, reject) => {
             clip.writeText = async arg => {
+              arg = arg.replace(/(?<!^)\$\$(.*?)\$\$(?!$)/gm, '$$$1$$'); // inline math
               markdown += arg.trimEnd() + "\n";
               resolve();
             };
