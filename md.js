@@ -87,8 +87,12 @@
     var ele = elements[i];
 
     // Get first child
-    var firstChild = ele.firstChild;
-    if (!firstChild) continue;
+    var firstChild = ele;
+    if (firstChild.firstChild?.tagName === "DIV") {
+      firstChild = firstChild.firstChild;
+      if (firstChild.firstChild?.tagName === "DIV") firstChild = firstChild.firstChild;
+    }
+    if (!firstChild.firstChild) continue;
 
     // Element child
     if (firstChild.nodeType === Node.ELEMENT_NODE) {
