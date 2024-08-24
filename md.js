@@ -1,45 +1,32 @@
 (async function exportMarkdown() {
-  function consoleSave(console, fileType, title = "") {
-    console.save = function (data) {
-      let mimeType = "text/plain";
+  function save(extension, mimeType, title, data) {
+    let filename = title ? title.trim().toLowerCase().replace(/^[^\w\d]+|[^\w\d]+$/g, '').replace(/[\s\W-]+/g, '-') : "claude";
+    filename += extension;
 
-      let filename = title ? title.trim().toLowerCase().replace(/^[^\w\d]+|[^\w\d]+$/g, '').replace(/[\s\W-]+/g, '-') : "claude";
-      if (fileType.toLowerCase() === "json") {
-        filename += ".json";
-        mimeType = "text/json";
+    var blob = new Blob([data], { type: mimeType });
+    var a = document.createElement("a");
 
-        if (typeof data === "object") {
-          data = JSON.stringify(data, undefined, 4);
-        }
-      } else if (fileType.toLowerCase() === "md") {
-        filename += ".md";
-      }
+    a.download = filename;
+    a.href = window.URL.createObjectURL(blob);
+    a.dataset.downloadurl = [mimeType, a.download, a.href].join(":");
+    var e = new MouseEvent("click", {
+      canBubble: true,
+      cancelable: false,
+      view: window,
+      detail: 0,
+      screenX: 0,
+      screenY: 0,
+      clientX: 0,
+      clientY: 0,
+      ctrlKey: false,
+      altKey: false,
+      shiftKey: false,
+      metaKey: false,
+      button: 0,
+      relatedTarget: null,
+    });
 
-      var blob = new Blob([data], { type: mimeType });
-      var a = document.createElement("a");
-
-      a.download = filename;
-      a.href = window.URL.createObjectURL(blob);
-      a.dataset.downloadurl = [mimeType, a.download, a.href].join(":");
-      var e = new MouseEvent("click", {
-        canBubble: true,
-        cancelable: false,
-        view: window,
-        detail: 0,
-        screenX: 0,
-        screenY: 0,
-        clientX: 0,
-        clientY: 0,
-        ctrlKey: false,
-        altKey: false,
-        shiftKey: false,
-        metaKey: false,
-        button: 0,
-        relatedTarget: null,
-      });
-
-      a.dispatchEvent(e);
-    };
+    a.dispatchEvent(e);
   }
 
   function getTimestamp() {
@@ -249,7 +236,5 @@
   }
 
   // Save to file
-  consoleSave(console, "md", title);
-  console.save(markdown);
-  return markdown;
+  save(".md", "text/plain", title, markdown);
 })();
