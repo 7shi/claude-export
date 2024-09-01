@@ -18,6 +18,30 @@
     return buttons.length ? buttons[0] : null;
   }
 
+  // Edit all user elements
+  let edits = 0;
+  for (const ele of chatContainer.childNodes) {
+    if (isTarget(ele)) {
+      const userElement = ele.querySelector("div.font-user-message");
+      if (userElement) {
+        const div = userElement.parentElement.nextElementSibling;
+        if (div) {
+          const edit = findButton(div, "Edit");
+          if (edit) {
+            edit.click();
+            edits++;
+          }
+        }
+      }
+    }
+  }
+
+  for (let i = 0; i < 30; i++) {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    const forms = chatContainer.getElementsByTagName("form");
+    if (forms.length == edits) break;
+  }
+
   const timestamp = getTimestamp();
   let markdown = `# ${title || "Claude Chat"}\n\`${timestamp}\`\n`;
 
@@ -43,9 +67,17 @@
   }
 
   for (const ele of chatContainer.childNodes) {
+    let caption = "\n## Prompt:\n\n";
+    if (ele.tagName === "FORM") {
+      const textarea = ele.querySelector("textarea");
+      if (textarea) {
+        markdown += caption + modifyForObsidian(textarea.value).trimEnd() + "\n\n";
+      }
+      continue;
+    }
+
     if (!isTarget(ele)) continue;
 
-    let caption = "\n## Prompt:\n\n";
     const user = ele.querySelector("div.font-user-message");
     if (user) {
       convertMarkdown(user, caption);
@@ -77,6 +109,15 @@
       clip.writeText = clip._writeText;
     }
   }
+
+  chatContainer.dispatchEvent(new KeyboardEvent('keydown', {
+    key: 'Escape',
+    code: 'Escape',
+    keyCode: 27,
+    which: 27,
+    bubbles: true,
+    cancelable: true
+  }));
 
   // Save to file
   save(".md", "text/plain", title, markdown);
