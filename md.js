@@ -4,11 +4,12 @@
     filename += extension;
 
     const blob = new Blob([data], { type: mimeType });
-    const a = document.createElement("a");
 
+    const a = document.createElement("a");
     a.download = filename;
     a.href = window.URL.createObjectURL(blob);
     a.dataset.downloadurl = [mimeType, a.download, a.href].join(":");
+
     const e = new MouseEvent("click", {
       canBubble: true,
       cancelable: false,
@@ -59,12 +60,9 @@
     return { elements, title };
   }
 
-  let markdown = "";
-
   const { elements, title } = getContents();
-
   const timestamp = getTimestamp();
-  markdown += `\# ${title || "Claude Chat"}\n\`${timestamp}\`\n`;
+  let markdown = `# ${title || "Claude Chat"}\n\`${timestamp}\`\n`;
 
   for (let i = 0; i < elements.length; i++) {
     const ele = elements[i];
