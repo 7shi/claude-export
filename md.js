@@ -122,6 +122,12 @@
       const codeBlockData = codeBlockSplit[1].trim();
       markdown += `\`\`\`${codeBlockLang}\n${codeBlockData}\n\`\`\`\n`;
     }
+    if (tag === "DIV") {
+      const div = childNode.querySelector("div.code-block__code");
+      if (!div) return "";
+      const codeBlockData = div.innerText.trim();
+      markdown += `\`\`\`\n${codeBlockData}\n\`\`\`\n`;
+    }
 
     // Quotes
     if (tag === "BLOCKQUOTE") {
