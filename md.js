@@ -60,6 +60,24 @@
     return { elements, title };
   }
 
+  function getPanel(ele) {
+    let firstChild = ele;
+    if (firstChild.firstChild?.tagName === "DIV") {
+      firstChild = firstChild.firstChild;
+      if (firstChild.firstChild?.tagName === "DIV") firstChild = firstChild.firstChild;
+    }
+    if (!firstChild.firstChild) firstChild = null;
+
+    let copy = null;
+    if (firstChild && firstChild.nodeType === Node.ELEMENT_NODE) {
+      if (ele.classList.contains("font-claude-message")) {
+        const buttons = Array.from(ele.nextSibling.getElementsByTagName("button")).filter(b => b.innerText == "Copy")
+        if (buttons.length) copy = buttons[0];
+      }
+    }
+    return { firstChild, copy };
+  }
+
   const { elements, title } = getContents();
   const timestamp = getTimestamp();
   let markdown = `# ${title || "Claude Chat"}\n\`${timestamp}\`\n`;
@@ -68,37 +86,29 @@
     const ele = elements[i];
 
     // Get first child
-    let firstChild = ele;
-    if (firstChild.firstChild?.tagName === "DIV") {
-      firstChild = firstChild.firstChild;
-      if (firstChild.firstChild?.tagName === "DIV") firstChild = firstChild.firstChild;
-    }
-    if (!firstChild.firstChild) continue;
+    const { firstChild, copy } = getPanel(ele);
+    if (!firstChild) continue;
 
     // Element child
-    if (firstChild.nodeType !== Node.ELEMENT_NODE) continue;
-
     const childNodes = firstChild.childNodes;
 
     // Prefix Claude reponse label
-    if (ele.classList.contains("font-claude-message")) {
+    if (copy) {
       markdown += `_Claude_:\n`;
       const clip = navigator.clipboard;
       if (!clip._writeText) clip._writeText = clip.writeText;
-      for (let copy of Array.from(ele.nextSibling.getElementsByTagName("button")).filter(b => b.innerText == "Copy")) {
-        await new Promise((resolve, reject) => {
-          clip.writeText = async arg => {
-            arg = arg.replace(/(?<!^)\$\$(.*?)\$\$(?!$)/gm, '$$$1$$'); // inline math
-            markdown += arg.trimEnd() + "\n";
-            resolve();
-          };
-          try {
-            copy.click();
-          } catch (e) {
-            reject(e);
-          }
-        });
-      }
+      await new Promise((resolve, reject) => {
+        clip.writeText = async arg => {
+          arg = arg.replace(/(?<!^)\$\$(.*?)\$\$(?!$)/gm, '$$$1$$'); // inline math
+          markdown += arg.trimEnd() + "\n";
+          resolve();
+        };
+        try {
+          copy.click();
+        } catch (e) {
+          reject(e);
+        }
+      });
       clip.writeText = clip._writeText;
     } else {
       markdown += `\n## Prompt:\n\n`;
