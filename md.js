@@ -49,17 +49,14 @@
     const titleEle = document.querySelector(
       "button[data-testid='chat-menu-trigger']"
     );
-    const titleText = titleEle ? titleEle.textContent : "";
+    const title = titleEle ? titleEle.textContent : "";
 
     // Find all chat elements
     const elements = chatContainer.querySelectorAll(
       "div.font-claude-message, div.font-user-message"
     );
 
-    return {
-      elements,
-      title: titleText,
-    };
+    return { elements, title };
   }
 
   var markdown = "";
