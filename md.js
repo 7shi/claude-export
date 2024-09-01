@@ -40,14 +40,11 @@
       .replace("T", " ");
   }
 
-  function getChatContainer() {
-    return document.querySelector("div.flex-1.flex.flex-col.gap-3.px-4");
-  }
+  // Get parent chat container
+  const chatContainer = document.querySelector(
+    "div.flex-1.flex.flex-col.gap-3.px-4");
 
   function getContents() {
-    // Get parent chat container
-    const chatContainer = getChatContainer();
-
     // Get chat title (if exists)
     const titleEle = document.querySelector(
       "button[data-testid='chat-menu-trigger']"
