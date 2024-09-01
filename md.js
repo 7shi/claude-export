@@ -19,7 +19,7 @@
   }
 
   // Edit all user elements
-  let edits = 0;
+  let forms = chatContainer.getElementsByTagName("form").length;
   for (const ele of chatContainer.childNodes) {
     if (isTarget(ele)) {
       const userElement = ele.querySelector("div.font-user-message");
@@ -29,7 +29,7 @@
           const edit = findButton(div, "Edit");
           if (edit) {
             edit.click();
-            edits++;
+            forms++;
           }
         }
       }
@@ -38,8 +38,7 @@
 
   for (let i = 0; i < 30; i++) {
     await new Promise(resolve => setTimeout(resolve, 100));
-    const forms = chatContainer.getElementsByTagName("form");
-    if (forms.length == edits) break;
+    if (chatContainer.getElementsByTagName("form").length == forms) break;
   }
 
   const timestamp = getTimestamp();
