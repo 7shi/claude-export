@@ -7,26 +7,23 @@
   const title = document.querySelector(
     "button[data-testid='chat-menu-trigger']")?.textContent || "";
 
-  // Find all chat elements
-  const elements = chatContainer.querySelectorAll(
-    "div.font-claude-message, div.font-user-message");
+  const timestamp = getTimestamp();
+  let markdown = `# ${title || "Claude Chat"}\n\`${timestamp}\`\n`;
 
-  function getPanel(ele) {
+  function convertMarkdown(ele, caption) {
     let firstChild = ele;
     if (firstChild.firstChild?.tagName === "DIV") {
       firstChild = firstChild.firstChild;
       if (firstChild.firstChild?.tagName === "DIV") firstChild = firstChild.firstChild;
     }
-    if (!firstChild.firstChild) firstChild = null;
+    if (!firstChild.firstChild) return;
 
-    let copy = null;
-    if (firstChild && firstChild.nodeType === Node.ELEMENT_NODE) {
-      if (ele.classList.contains("font-claude-message")) {
-        const buttons = Array.from(ele.nextSibling.getElementsByTagName("button")).filter(b => b.innerText == "Copy")
-        if (buttons.length) copy = buttons[0];
-      }
+    markdown += caption;
+
+    // Parse child elements
+    for (const child of firstChild.childNodes) {
+      markdown += parseChildElement(child);
     }
-    return { firstChild, copy };
   }
 
   function modifyForObsidian(s) {
@@ -34,19 +31,21 @@
     return s;
   }
 
-  const timestamp = getTimestamp();
-  let markdown = `# ${title || "Claude Chat"}\n\`${timestamp}\`\n`;
+  for (const ele of chatContainer.childNodes) {
+    const user = ele.querySelector("div.font-user-message");
+    if (user) {
+      convertMarkdown(user, "\n## Prompt:\n\n");
+      continue;
+    }
 
-  for (let i = 0; i < elements.length; i++) {
-    const ele = elements[i];
-
-    // Get first child
-    const { firstChild, copy } = getPanel(ele);
-    if (!firstChild) continue;
-
-    // Prefix Claude reponse label
-    if (copy) {
-      markdown += `_Claude_:\n`;
+    const claude = ele.querySelector("div.font-claude-message");
+    if (claude) {
+      const buttons = Array.from(claude.nextSibling.getElementsByTagName("button")).filter(b => b.innerText == "Copy")
+      if (!buttons.length) {
+        convertMarkdown(claude, "_Claude_:\n");
+        continue;
+      }
+      markdown += "_Claude_:\n";
       const clip = navigator.clipboard;
       if (!clip._writeText) clip._writeText = clip.writeText;
       await new Promise((resolve, reject) => {
@@ -55,22 +54,12 @@
           resolve();
         };
         try {
-          copy.click();
+          buttons[0].click();
         } catch (e) {
           reject(e);
         }
       });
       clip.writeText = clip._writeText;
-    } else {
-      markdown += `\n## Prompt:\n\n`;
-
-      // Element child
-      const childNodes = firstChild.childNodes;
-
-      // Parse child elements
-      for (let n = 0; n < childNodes.length; n++) {
-        markdown += parseChildElement(childNodes[n]);
-      }
     }
   }
 
