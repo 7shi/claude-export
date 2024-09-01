@@ -7,6 +7,17 @@
   const title = document.querySelector(
     "button[data-testid='chat-menu-trigger']")?.textContent || "";
 
+  function isTarget(ele) {
+    return ele.tagName === "DIV" && ele.hasAttribute("data-test-render-count");
+  }
+
+  function findButton(ele, caption) {
+    const buttons = Array
+      .from(ele.getElementsByTagName("button"))
+      .filter(b => b.innerText == caption);
+    return buttons.length ? buttons[0] : null;
+  }
+
   const timestamp = getTimestamp();
   let markdown = `# ${title || "Claude Chat"}\n\`${timestamp}\`\n`;
 
@@ -32,20 +43,24 @@
   }
 
   for (const ele of chatContainer.childNodes) {
+    if (!isTarget(ele)) continue;
+
+    let caption = "\n## Prompt:\n\n";
     const user = ele.querySelector("div.font-user-message");
     if (user) {
-      convertMarkdown(user, "\n## Prompt:\n\n");
+      convertMarkdown(user, caption);
       continue;
     }
 
+    caption = "_Claude_:\n";
     const claude = ele.querySelector("div.font-claude-message");
     if (claude) {
-      const buttons = Array.from(claude.nextSibling.getElementsByTagName("button")).filter(b => b.innerText == "Copy")
-      if (!buttons.length) {
-        convertMarkdown(claude, "_Claude_:\n");
+      const copy = findButton(claude.nextSibling, "Copy");
+      if (!copy) {
+        convertMarkdown(claude, caption);
         continue;
       }
-      markdown += "_Claude_:\n";
+      markdown += caption;
       const clip = navigator.clipboard;
       if (!clip._writeText) clip._writeText = clip.writeText;
       await new Promise((resolve, reject) => {
@@ -54,7 +69,7 @@
           resolve();
         };
         try {
-          buttons[0].click();
+          copy.click();
         } catch (e) {
           reject(e);
         }
