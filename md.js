@@ -197,6 +197,11 @@
     return markdown + "\n";
   }
 
+  function modifyForObsidian(s) {
+    s = s.replace(/(?<!^)\$\$(.*?)\$\$(?!$)/gm, '$$$1$$'); // inline math
+    return s;
+  }
+
   const { elements, title } = getContents();
   const timestamp = getTimestamp();
   let markdown = `# ${title || "Claude Chat"}\n\`${timestamp}\`\n`;
@@ -215,8 +220,7 @@
       if (!clip._writeText) clip._writeText = clip.writeText;
       await new Promise((resolve, reject) => {
         clip.writeText = async arg => {
-          arg = arg.replace(/(?<!^)\$\$(.*?)\$\$(?!$)/gm, '$$$1$$'); // inline math
-          markdown += arg.trimEnd() + "\n";
+          markdown += modifyForObsidian(arg).trimEnd() + "\n";
           resolve();
         };
         try {
