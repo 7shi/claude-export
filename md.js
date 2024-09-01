@@ -105,7 +105,7 @@
       });
     }
     if (tag === "UL") {
-      childNode.childNodes.forEach((listItemNode, index) => {
+      childNode.childNodes.forEach((listItemNode) => {
         if (
           listItemNode.nodeType === Node.ELEMENT_NODE &&
           listItemNode.tagName === "LI"
