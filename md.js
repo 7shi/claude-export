@@ -60,7 +60,6 @@
   }
 
   let markdown = "";
-  // var elements = document.querySelectorAll("[class*='min-h-[20px]']");
 
   const { elements, title } = getContents();
 
@@ -218,16 +217,6 @@
         // Paragraph break after each element
         markdown += "\n";
       }
-    }
-
-    // Text child
-    if (firstChild.nodeType === Node.TEXT_NODE) {
-      // Prefix User prompt label
-      // markdown += `_Prompt_: \n`;
-      // markdown += `${firstChild.textContent}\n`;
-
-      // End of prompt paragraphs breaks
-      markdown += "\n";
     }
   }
 
