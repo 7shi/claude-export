@@ -3,13 +3,13 @@
     let filename = title ? title.trim().toLowerCase().replace(/^[^\w\d]+|[^\w\d]+$/g, '').replace(/[\s\W-]+/g, '-') : "claude";
     filename += extension;
 
-    var blob = new Blob([data], { type: mimeType });
-    var a = document.createElement("a");
+    const blob = new Blob([data], { type: mimeType });
+    const a = document.createElement("a");
 
     a.download = filename;
     a.href = window.URL.createObjectURL(blob);
     a.dataset.downloadurl = [mimeType, a.download, a.href].join(":");
-    var e = new MouseEvent("click", {
+    const e = new MouseEvent("click", {
       canBubble: true,
       cancelable: false,
       view: window,
@@ -59,19 +59,19 @@
     return { elements, title };
   }
 
-  var markdown = "";
+  let markdown = "";
   // var elements = document.querySelectorAll("[class*='min-h-[20px]']");
 
   const { elements, title } = getContents();
 
-  var timestamp = getTimestamp();
+  const timestamp = getTimestamp();
   markdown += `\# ${title || "Claude Chat"}\n\`${timestamp}\`\n`;
 
-  for (var i = 0; i < elements.length; i++) {
-    var ele = elements[i];
+  for (let i = 0; i < elements.length; i++) {
+    const ele = elements[i];
 
     // Get first child
-    var firstChild = ele;
+    let firstChild = ele;
     if (firstChild.firstChild?.tagName === "DIV") {
       firstChild = firstChild.firstChild;
       if (firstChild.firstChild?.tagName === "DIV") firstChild = firstChild.firstChild;
@@ -80,14 +80,14 @@
 
     // Element child
     if (firstChild.nodeType === Node.ELEMENT_NODE) {
-      var childNodes = firstChild.childNodes;
+      const childNodes = firstChild.childNodes;
 
       // Prefix Claude reponse label
       if (ele.classList.contains("font-claude-message")) {
         markdown += `_Claude_:\n`;
-        var clip = navigator.clipboard;
+        const clip = navigator.clipboard;
         if (!clip._writeText) clip._writeText = clip.writeText;
-        for (var copy of Array.from(ele.nextSibling.getElementsByTagName("button")).filter(b => b.innerText == "Copy")) {
+        for (let copy of Array.from(ele.nextSibling.getElementsByTagName("button")).filter(b => b.innerText == "Copy")) {
           await new Promise((resolve, reject) => {
             clip.writeText = async arg => {
               arg = arg.replace(/(?<!^)\$\$(.*?)\$\$(?!$)/gm, '$$$1$$'); // inline math
@@ -106,12 +106,12 @@
         markdown += `\n## Prompt:\n\n`;
 
         // Parse child elements
-        for (var n = 0; n < childNodes.length; n++) {
+        for (let n = 0; n < childNodes.length; n++) {
           const childNode = childNodes[n];
 
           if (childNode.nodeType === Node.ELEMENT_NODE) {
-            var tag = childNode.tagName;
-            var text = childNode.textContent;
+            const tag = childNode.tagName;
+            const text = childNode.textContent;
             // Paragraphs
             if (tag === "P") {
               markdown += `${text}\n`;
@@ -119,7 +119,7 @@
 
             // Get list items
             if (tag === "OL") {
-              var index = 0;
+              let index = 0;
               childNode.childNodes.forEach((listItemNode) => {
                 if (
                   listItemNode.nodeType === Node.ELEMENT_NODE &&
